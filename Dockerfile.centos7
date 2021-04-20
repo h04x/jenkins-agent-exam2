@@ -1,10 +1,10 @@
-FROM centos:8
+FROM centos:7
 
-RUN yum install --setopt=skip_missing_names_on_install=False -y \
+RUN yum install -y epel-release
+
+RUN yum install --setopt=skip_missing_names_on_install=False -y \ 
     java-1.8.0-openjdk openssh-server \
-    python3 python3-pip git python3-coverage yum-utils 
-
-RUN yum install -y epel-release && yum install -y ansible
+    python3 python3-pip git python36-coverage ansible
 
 RUN yum-config-manager \
     --add-repo \
@@ -23,7 +23,7 @@ ADD id_rsa.pub /home/jenkins/.ssh/authorized_keys
 RUN ssh-keygen -A
 RUN mkdir /run/sshd
 
-RUN rm /run/nologin
+# RUN rm /run/nologin
 
 EXPOSE 22
 
