@@ -1,0 +1,32 @@
+FROM centos:8
+
+RUN yum install -y java-1.8.0-openjdk openssh-server \
+    python3 python3-pip git python3-coverage yum-utils 
+
+RUN yum install -y epel-release && yum install -y ansible
+
+curl https://download.docker.com/linux/centos/8/x86_64/stable/Packages/docker-ce-20.10.6-3.el8.x86_64.rpm -o docker-ce.rpm \
+    && curl https://download.docker.com/linux/centos/8/x86_64/stable/Packages/docker-ce-cli-20.10.6-3.el8.x86_64.rpm -o docker-ce-cli.rpm \
+    && curl https://download.docker.com/linux/centos/8/x86_64/stable/Packages/docker-ce-rootless-extras-20.10.6-3.el8.x86_64.rpm -o docker-ce-rootless-extras.rpm \
+    && curl https://download.docker.com/linux/centos/8/x86_64/stable/Packages/containerd.io-1.4.4-3.1.el8.x86_64.rpm -o containerd.io.rpm \
+    && curl https://download.docker.com/linux/centos/8/x86_64/stable/Packages/docker-scan-plugin-0.7.0-3.el8.x86_64.rpm -o docker-scan-plugin.rpm
+
+RUN yum install -y docker-scan-plugin.rpm docker-ce-cli.rpm \
+    docker-ce-rootless-extras.rpm containerd.io.rpm docker-ce.rpm
+
+RUN sed -i /etc/ssh/sshd_config \
+    -e 's/#RSAAuthentication.*/RSAAuthentication yes/'  \
+    -e 's/#PubkeyAuthentication.*/PubkeyAuthentication yes/'
+
+RUN useradd -m -s /bin/bash jenkins && mkdir /home/jenkins/.ssh \
+    mkdir /root/.ssh
+ADD id_rsa.pub /home/jenkins/.ssh/authorized_keys
+
+RUN ssh-keygen -A
+RUN mkdir /run/sshd
+
+RUN rm /run/nologin
+
+EXPOSE 22
+
+CMD ["/usr/sbin/sshd", "-D"]
