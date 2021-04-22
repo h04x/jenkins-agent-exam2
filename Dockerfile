@@ -27,4 +27,5 @@ RUN rm /run/nologin
 
 EXPOSE 22
 
-CMD ["/usr/sbin/sshd", "-D"]
+ADD entrypoint.sh .
+ENTRYPOINT ["./entrypoint.sh"]
